@@ -1,5 +1,6 @@
-// ImageGallery.jsx
 import update from "immutability-helper";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
 import { useCallback, useEffect, useState } from "react";
 import Image from "./Image";
 import axios from "axios";
@@ -91,39 +92,41 @@ const ImageGallery = () => {
   }
 
   return (
-    <div className=" container bg-white mx-auto rounded-md">
-      {selectedImages?.length > 0 ? (
-        <div className="bg-white flex justify-between items-center py-[.9rem] px-6 mt-6 rounded-t-md border-b ">
-          <h3 className="text-lg">{getImageSelectText()}</h3>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all delay-75 ease-linear"
-          >
-            Delete
-          </button>
+    <DndProvider backend={HTML5Backend}>
+      <div className=" container bg-white mx-auto rounded-md">
+        {selectedImages?.length > 0 ? (
+          <div className="bg-white flex justify-between items-center py-[.9rem] px-6 mt-6 rounded-t-md border-b ">
+            <h3 className="text-lg">{getImageSelectText()}</h3>
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all delay-75 ease-linear"
+            >
+              Delete
+            </button>
+          </div>
+        ) : (
+          <h1 className="bg-white text-xl font-medium py-5 px-6 mt-6 rounded-t-md border-b">
+            Gallery
+          </h1>
+        )}
+        <div className="bg-white grid grid-cols-2 gap-4 py-4 px-6  md:grid-cols-4 lg:grid-cols-5 mb-10 rounded-b-md">
+          {images?.length > 0 &&
+            images?.map((image, index) => (
+              <Image
+                key={image?._id}
+                id={image?._id}
+                image={image?.url}
+                imageAlt={image?.alt}
+                index={index}
+                moveImageCard={moveImageCard}
+                onImageSelect={handleImageSelect}
+                findImage={findImage}
+              />
+            ))}
+          <input type="file" className="w-full h-full border rounded-md" />
         </div>
-      ) : (
-        <h1 className="bg-white text-xl font-medium py-5 px-6 mt-6 rounded-t-md border-b">
-          Gallery
-        </h1>
-      )}
-      <div className="bg-white grid grid-cols-2 gap-4 py-4 px-6  md:grid-cols-4 lg:grid-cols-5 mb-10 rounded-b-md">
-        {images?.length > 0 &&
-          images?.map((image, index) => (
-            <Image
-              key={image?._id}
-              id={image?._id}
-              image={image?.url}
-              imageAlt={image?.alt}
-              index={index}
-              moveImageCard={moveImageCard}
-              onImageSelect={handleImageSelect}
-              findImage={findImage}
-            />
-          ))}
-        <input type="file" className="w-full h-full border rounded-md" />
       </div>
-    </div>
+    </DndProvider>
   );
 };
 
