@@ -2,6 +2,16 @@
 import { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 
+/**
+ * Image Component
+ * @param {string} url - The URL of the image.
+ * @param {string} imageAlt - The alt text for the image.
+ * @param {string} id - The unique identifier for the image.
+ * @param {number} index - The index of the image in the array.
+ * @param {function} moveImageCard - Callback function to move the image card.
+ * @param {function} onImageSelect - Callback function to handle image selection.
+ * @param {function} findImage - Callback function to find image by ID.
+ */
 const Image = ({
   url,
   imageAlt,
@@ -11,15 +21,21 @@ const Image = ({
   onImageSelect,
   findImage,
 }) => {
+  // State to track checkbox state
   const [isChecked, setIsChecked] = useState(false);
+  // State to track hover state
   const [isHovered, setIsHovered] = useState(false);
 
+  // Function to handle checkbox change
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
     onImageSelect(index, !isChecked);
   };
 
+  // Get the original index of the image
   const originalIndex = findImage(id)?.index;
+
+  // Use drag and drop hooks
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: "IMAGE",
@@ -28,9 +44,9 @@ const Image = ({
         isDragging: monitor.isDragging(),
       }),
       end: (item, monitor) => {
-        console.log("item", item);
         const { id: droppedId, originalIndex } = item;
         const didDrop = monitor.didDrop();
+        // If the image is not dropped, move it back to the original position
         if (!didDrop) {
           moveImageCard(droppedId, originalIndex);
         }
@@ -38,11 +54,13 @@ const Image = ({
     }),
     [id, originalIndex, moveImageCard]
   );
+
+  // Use drop hook for hovering over the image
   const [, drop] = useDrop(
     () => ({
       accept: "IMAGE",
       hover({ id: draggedId }) {
-        console.log("draggedId", draggedId);
+        // If the dragged image is different from the current image, move the card
         if (draggedId !== id) {
           const { index: overIndex } = findImage(id);
           moveImageCard(draggedId, overIndex);
@@ -52,6 +70,7 @@ const Image = ({
     [findImage, moveImageCard]
   );
 
+  // Apply opacity and visibility classes based on drag and hover states
   const opacityClasses = isDragging ? "opacity-50" : "opacity-100";
   const visibilityClasses = isHovered || isChecked ? "visible" : "hidden";
 
@@ -64,19 +83,22 @@ const Image = ({
         index === 0 ? "col-span-2 row-span-2" : " "
       } ${opacityClasses}`}
     >
+      {/* Overlay for highlighting on hover */}
       <div
         className={`absolute inset-0 bg-gray-800 opacity-50 rounded-md ${visibilityClasses} transition-all duration-300 ease-in`}
       ></div>
+      {/* Checkbox for image selection */}
       <input
         type="checkbox"
         checked={isChecked}
         onChange={handleCheckboxChange}
         className={`absolute top-2 left-2 text-white cursor-pointer w-5 h-5 ${visibilityClasses}`}
       />
+      {/* Image */}
       <img
         src={url}
         alt={imageAlt}
-        className=" rounded-md shadow-sm aspect-square border"
+        className="rounded-md shadow-sm aspect-square border"
       />
     </div>
   );
