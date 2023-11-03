@@ -4,6 +4,7 @@ import { DndProvider } from "react-dnd";
 import { useCallback, useEffect, useState } from "react";
 import Image from "./Image";
 import axios from "axios";
+import { GrGallery } from "react-icons/gr";
 
 const ImageGallery = () => {
   const [images, setImages] = useState([]);
@@ -86,7 +87,7 @@ const ImageGallery = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        Loading
+        Loading...
       </div>
     );
   }
@@ -101,7 +102,7 @@ const ImageGallery = () => {
               onClick={handleDelete}
               className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all delay-75 ease-linear"
             >
-              Delete
+              Delete {selectedImages?.length > 1 ? "files" : "file"}
             </button>
           </div>
         ) : (
@@ -123,7 +124,14 @@ const ImageGallery = () => {
                 findImage={findImage}
               />
             ))}
-          <input type="file" className="w-full h-full border rounded-md" />
+
+          <div className="w-full h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-gray-300 border-dashed rounded-md text-black">
+            <span className="text-xl">
+              <GrGallery />
+            </span>
+            <span>Add Images</span>
+            <input type="file" id="files" className="hidden" />
+          </div>
         </div>
       </div>
     </DndProvider>
