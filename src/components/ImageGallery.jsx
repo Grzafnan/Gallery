@@ -86,7 +86,8 @@ const ImageGallery = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
+      <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
+        <div className="w-6 h-6 border-4 border-dashed rounded-full animate-spin dark:border-violet-600 mr-2"></div>
         Loading...
       </div>
     );
@@ -94,7 +95,7 @@ const ImageGallery = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className=" container bg-white mx-auto rounded-md">
+      <div className="container bg-white mx-auto rounded-md">
         {selectedImages?.length > 0 ? (
           <div className="bg-white flex justify-between items-center py-[.9rem] px-6 mt-6 rounded-t-md border-b ">
             <h3 className="text-lg">{getImageSelectText()}</h3>
@@ -111,12 +112,13 @@ const ImageGallery = () => {
           </h1>
         )}
         <div className="bg-white grid grid-cols-2 gap-4 py-4 px-6  md:grid-cols-4 lg:grid-cols-5 mb-10 rounded-b-md">
-          {images?.length > 0 &&
+          {!loading &&
+            images?.length > 0 &&
             images?.map((image, index) => (
               <Image
                 key={image?._id}
                 id={image?._id}
-                image={image?.url}
+                url={image?.url}
                 imageAlt={image?.alt}
                 index={index}
                 moveImageCard={moveImageCard}
@@ -124,14 +126,16 @@ const ImageGallery = () => {
                 findImage={findImage}
               />
             ))}
-
-          <div className="w-full h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-gray-300 border-dashed rounded-md text-black">
+          <label
+            htmlFor="files"
+            className="w-full h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-dashed rounded-md text-black"
+          >
             <span className="text-xl">
               <GrGallery />
             </span>
             <span>Add Images</span>
             <input type="file" id="files" className="hidden" />
-          </div>
+          </label>
         </div>
       </div>
     </DndProvider>

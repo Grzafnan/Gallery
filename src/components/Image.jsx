@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 
 const Image = ({
-  image,
+  url,
   imageAlt,
   id,
   index,
@@ -51,7 +51,10 @@ const Image = ({
     }),
     [findImage, moveImageCard]
   );
-  const opacity = isDragging ? 0.5 : 1;
+
+  const opacityClasses = isDragging ? "opacity-50" : "opacity-100";
+  const visibilityClasses = isHovered || isChecked ? "visible" : "hidden";
+
   return (
     <div
       ref={(node) => drag(drop(node))}
@@ -59,29 +62,21 @@ const Image = ({
       onMouseLeave={() => setIsHovered(false)}
       className={`relative cursor-pointer transition-opacity ${
         index === 0 ? "col-span-2 row-span-2" : " "
-      }`}
-      style={{
-        opacity,
-      }}
+      } ${opacityClasses}`}
     >
       <div
-        className="absolute inset-0 bg-gray-800 opacity-50 rounded-md"
-        style={{
-          visibility: isHovered || isChecked ? "visible" : "hidden",
-          transition: "visibility 0.3s, opacity 0.3s ease-in",
-        }}
+        className={`absolute inset-0 bg-gray-800 opacity-50 rounded-md ${visibilityClasses} transition-all duration-300 ease-in`}
       ></div>
       <input
         type="checkbox"
         checked={isChecked}
         onChange={handleCheckboxChange}
-        className="absolute top-2 left-2 text-white cursor-pointer w-5 h-5"
-        style={{ visibility: isHovered || isChecked ? "visible" : "hidden" }}
+        className={`absolute top-2 left-2 text-white cursor-pointer w-5 h-5 ${visibilityClasses}`}
       />
       <img
-        src={image}
+        src={url}
         alt={imageAlt}
-        className="w-full h-full rounded-md shadow-sm aspect-square border"
+        className=" rounded-md shadow-sm aspect-square border"
       />
     </div>
   );
