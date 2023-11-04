@@ -2,7 +2,7 @@ import ImageGallery from "./components/ImageGallery";
 
 function App() {
   return (
-    <main className="py-4">
+    <main className="p-4">
       <ImageGallery />
     </main>
   );

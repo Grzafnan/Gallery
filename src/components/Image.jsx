@@ -79,7 +79,7 @@ const Image = ({
       ref={(node) => drag(drop(node))}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative cursor-pointer transition-opacity ${
+      className={`relative cursor-pointer transition-opacity  border-3 border-red-600 ${
         index === 0 ? "col-span-2 row-span-2" : " "
       } ${opacityClasses}`}
     >
@@ -88,18 +88,21 @@ const Image = ({
         className={`absolute inset-0 bg-gray-800 opacity-50 rounded-md ${visibilityClasses} transition-all duration-300 ease-in`}
       ></div>
       {/* Checkbox for image selection */}
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={handleCheckboxChange}
-        className={`absolute top-2 left-2 text-white cursor-pointer w-5 h-5 ${visibilityClasses}`}
-      />
-      {/* Image */}
-      <img
-        src={url}
-        alt={imageAlt}
-        className="rounded-md shadow-sm aspect-square border"
-      />
+      <label htmlFor="checked">
+        <input
+          type="checkbox"
+          id={id}
+          checked={isChecked}
+          onChange={handleCheckboxChange}
+          className={`absolute top-2 left-2 text-white cursor-pointer w-5 h-5 ${visibilityClasses}`}
+        />
+        {/* Image */}
+        <img
+          src={url}
+          alt={imageAlt}
+          className="w-full h-full rounded-md shadow-sm aspect-square border"
+        />
+      </label>
     </div>
   );
 };

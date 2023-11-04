@@ -145,7 +145,7 @@ const ImageGallery = () => {
             {/* Add Images button */}
             <label
               htmlFor="files"
-              className="w-full h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-dashed rounded-md text-black"
+              className="w-full h-32 md:h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-dashed rounded-md text-black"
             >
               <span className="text-xl">
                 <GrGallery />
