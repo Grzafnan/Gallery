@@ -4,7 +4,7 @@ This project is a responsive image gallery built with React JS, incorporating fe
 
 ## Features:
 
-1. **Gallery Layout:**
+**Gallery Layout:**
 
 - Implemented a grid layout for the image gallery.
 - The gallery displays images, with one feature image larger than the others.
@@ -12,7 +12,7 @@ This project is a responsive image gallery built with React JS, incorporating fe
 - Enabled reordering functionality to rearrange the order of images in the gallery.
 - Implemented intuitive drag-and-drop functionality for reordering.
 
-1. **Deleting Multiple Images:**
+**Deleting Multiple Images:**
 
 - Users can select multiple images and delete them.
 - Clear visual indication of selected images for a user-friendly experience.
