@@ -1,105 +1,129 @@
-import update from "immutability-helper";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { DndProvider } from "react-dnd";
-import { useCallback, useEffect, useState } from "react";
-import Image from "./Image";
-import { GrGallery } from "react-icons/gr";
+import { useReducer, useEffect } from 'react';
+import update from 'immutability-helper';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
+import Image from './Image';
+import { GrGallery } from 'react-icons/gr';
+
+// Define actions
+const IS_LOADING = 'IS_LOADING';
+const SET_IMAGES = 'SET_IMAGES';
+const SELECT_IMAGE = 'SELECT_IMAGE';
+const DELETE_SELECTED_IMAGES = 'DELETE_SELECTED_IMAGES';
+
+// Reducer function
+const imageReducer = (state, action) => {
+  switch (action.type) {
+    case IS_LOADING:
+      // Set loading state based on the action payload
+      return { ...state, loading: action.payload };
+    case SET_IMAGES:
+      // Update images state with the data received in the payload
+      return { ...state, images: action.payload };
+    case SELECT_IMAGE:
+      // Update selectedImages state based on the payload
+      return { ...state, selectedImages: action.payload };
+    case DELETE_SELECTED_IMAGES:
+      // Remove selected images from the images state and clear selectedImages
+      return {
+        ...state,
+        images: state.images.filter((image) => !state.selectedImages.includes(image)),
+        selectedImages: [],
+      };
+    default:
+      return state;
+  }
+};
 
 const ImageGallery = () => {
-  // State for storing images
-  const [images, setImages] = useState([]);
-  // State for storing selected images
-  const [selectedImages, setSelectedImages] = useState([]);
-  // State for loading indicator
-  const [loading, isLoading] = useState(false);
+  // Initial state for the reducer
+  const initialState = {
+    images: [],
+    selectedImages: [],
+    loading: false,
+  };
 
-  // Fetch images from API on component mount
+  // Use reducer with the defined reducer function and initial state
+  const [state, dispatch] = useReducer(imageReducer, initialState);
+
+  // useEffect to fetch data when the component mounts
   useEffect(() => {
-    // Show loading indicator
-    isLoading(true);
-
-    // Fetch data from API
-    const fetchImages = async () => {
+    const fetchData = async () => {
       try {
-        const result = await fetch(`images.json`);
+        // Set loading to true before fetching data
+        dispatch({ type: IS_LOADING, payload: true });
+        const result = await fetch('images.json');
         const data = await result.json();
-
-        // Check if data is available
         if (data?.length > 0) {
-          setImages(data);
-          isLoading(false); // Hide loading indicator on successful fetch
+          // Update images state with fetched data
+          dispatch({ type: SET_IMAGES, payload: data });
         }
       } catch (error) {
-        // Handle error if needed
-        console.log("Error fetching images:", error);
-        isLoading(false); // Hide loading indicator on error
+        // Log error and set loading to false in case of an error
+        console.error('Error fetching images:', error);
+      } finally {
+        // Set loading to false after data is fetched or an error occurs
+        dispatch({ type: IS_LOADING, payload: false });
       }
     };
 
-    fetchImages();
-  }, []);
+    // Call the fetch data function
+    fetchData();
+  }, [dispatch]);
 
-  // Delete selected images
+  // Function to handle deleting selected images
   const handleDelete = () => {
-    // Remove selected images from the state
-    const updatedImages = images?.filter(
-      (image) => !selectedImages.includes(image)
-    );
-    setImages(updatedImages);
-    // Clear selected images
-    setSelectedImages([]);
+    // Dispatch the action to delete selected images
+    dispatch({ type: DELETE_SELECTED_IMAGES });
   };
 
-  // Handle image selection
+  // Function to handle image selection
   const handleImageSelect = (index, isSelected) => {
     const updatedSelectedImages = isSelected
-      ? [...selectedImages, images[index]]
-      : selectedImages?.filter((image) => image !== images[index]);
-    setSelectedImages(updatedSelectedImages);
+      ? [...state.selectedImages, state.images[index]]
+      : state.selectedImages.filter((image) => image !== state.images[index]);
+    // Dispatch the action to update selected images
+    dispatch({ type: SELECT_IMAGE, payload: updatedSelectedImages });
   };
 
-  // Find image by ID using memoized callback
-  const findImage = useCallback(
-    (id) => {
-      const image = images.filter((img) => `${img._id}` === id)[0];
-      return {
-        image,
-        index: images.indexOf(image),
-      };
-    },
-    [images]
-  );
+  // Function to find an image by ID
+  const findImage = (id) => {
+    const image = state.images.find((img) => `${img._id}` === id);
+    return {
+      image,
+      index: state.images.indexOf(image),
+    };
+  };
 
-  // Move image card using memoized callback
-  const moveImageCard = useCallback(
-    (id, atIndex) => {
-      const { image, index } = findImage(id);
-      setImages(
-        update(images, {
-          $splice: [
-            [index, 1],
-            [atIndex, 0, image],
-          ],
-        })
-      );
-    },
-    [findImage, images, setImages]
-  );
+  // Function to move an image card
+  const moveImageCard = (id, atIndex) => {
+    const { image, index } = findImage(id);
+    // Dispatch the action to update images state with the moved image
+    dispatch({
+      type: SET_IMAGES,
+      payload: update(state.images, {
+        $splice: [
+          [index, 1],
+          [atIndex, 0, image],
+        ],
+      }),
+    });
+  };
 
-  // Get text based on the number of selected images
+  // Function to get text based on the number of selected images
   const getImageSelectText = () => {
-    switch (selectedImages.length) {
+    switch (state.selectedImages.length) {
       case 0:
-        return "";
+        return '';
       case 1:
-        return "1 file selected";
+        return '1 file selected';
       default:
-        return `${selectedImages.length} files selected`;
+        return `${state.selectedImages.length} files selected`;
     }
   };
 
-  // Loading Start while fetching data
-  if (loading) {
+  // Conditional rendering based on loading state
+  if (state.loading) {
     return (
       <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
         <div className="w-6 h-6 border-4 border-dashed rounded-full animate-spin dark:border-violet-600 mr-2"></div>
@@ -108,28 +132,29 @@ const ImageGallery = () => {
     );
   }
 
+  // Render the component with DndProvider for drag and drop functionality
   return (
     <DndProvider backend={HTML5Backend}>
-      {!loading && images?.length > 0 && (
+      {!state.loading && state.images.length > 0 && (
         <section className="container bg-white mx-auto rounded-md">
-          {selectedImages?.length > 0 ? (
-            // Selected images display
+          {state.selectedImages.length > 0 ? (
+            // Display when there are selected images
             <div className="flex justify-between items-center py-[.9rem] px-6 border-b ">
               <h3 className="text-lg font-medium">{getImageSelectText()}</h3>
               <button
                 onClick={handleDelete}
                 className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all delay-75 ease-linear"
               >
-                Delete {selectedImages?.length > 1 ? "files" : "file"}
+                Delete {state.selectedImages.length > 1 ? 'files' : 'file'}
               </button>
             </div>
           ) : (
-            // Gallery header
+            // Display when there are no selected images
             <h1 className="text-xl font-medium py-5 px-6  border-b">Gallery</h1>
           )}
           {/* Image grid */}
           <div className="grid grid-cols-2 gap-4 py-4 px-6  md:grid-cols-4 lg:grid-cols-5 rounded-b-md overflow-auto">
-            {images?.map((image, index) => (
+            {state.images.map((image, index) => (
               // Individual image component
               <Image
                 key={image?._id}
