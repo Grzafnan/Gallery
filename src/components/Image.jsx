@@ -79,9 +79,8 @@ const Image = ({
       ref={(node) => drag(drop(node))}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative cursor-pointer transition-opacity  border-3 border-red-600 ${
-        index === 0 ? "col-span-2 row-span-2" : " "
-      } ${opacityClasses}`}
+      className={`relative cursor-pointer transition-opacity  border-3 border-red-600 ${index === 0 ? "col-span-2 row-span-2" : " "
+        } ${opacityClasses}`}
     >
       {/* Overlay for highlighting on hover */}
       <div
@@ -94,7 +93,7 @@ const Image = ({
           id={id}
           checked={isChecked}
           onChange={handleCheckboxChange}
-          className={`absolute top-2 left-2 text-white cursor-pointer w-5 h-5 ${visibilityClasses}`}
+          className={`absolute top-2 left-2 text-indigo-500 cursor-pointer w-5 h-5 ${visibilityClasses} transition-all duration-300 ease-in`}
         />
         {/* Image */}
         <img
