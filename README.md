@@ -28,7 +28,7 @@ This project is a responsive image gallery built with React JS, incorporating fe
 
 ## Live Demo:
 
-The React JS image gallery is hosted [here](https://shakil-ahmmed.netlify.app/).
+The React JS image gallery is hosted [here](https://images-gallery-ollyo.netlify.app/).
 
 ## Development:
 
