@@ -41,12 +41,12 @@ const imageReducer = (state, action) => {
       // Handle image upload response
       return {
         ...state,
-        images: [...state.images, action?.payload],
+        images: [...state.images, action.payload],
       };
     case IS_REFRESH:
       return {
         ...state,
-        refresh: action?.payload
+        refresh: action.payload
       }
     default:
       return state;
@@ -103,12 +103,13 @@ const ImageGallery = () => {
       const response = await axios.post(`https://api.imgbb.com/1/upload?key=199be7191b070f135985de4adcce0a6f`, formData)
       // Check if the upload was successful
       if (response?.data?.data?.id) {
-        const { id, display_url } = response?.data?.data;
+        const { id, display_url, title } = response?.data?.data;
         dispatch({
           type: UPLOAD_IMAGE, payload: {
             id,
             _id: id,
-            url: display_url
+            url: display_url,
+            alt: title
           }
         });
         toast.success('Image Upload successfully!', {
@@ -197,7 +198,7 @@ const ImageGallery = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       {!state.loading && state.images.length > 0 && (
-        <section className="container bg-gray-100 mx-auto rounded-md p-4 shadow-md overflow-y-scroll">
+        <section className="container bg-gray-100 mx-auto rounded-md p-4 shadow-lg">
 
           {state.selectedImages.length > 0 ? (
             // Display when there are selected images
@@ -213,10 +214,10 @@ const ImageGallery = () => {
             </div>
           ) : (
             // Display when there are no selected images
-            <h1 className="text-xl font-medium py-5 px-6 bg-white border-b shadow rounded-md">Gallery</h1>
+            <h1 className="text-xl font-medium py-5 px-6 bg-white border-b shadow-md rounded-md">Gallery</h1>
           )}
           {/* Image grid */}
-          <div className="w-full grid grid-cols-2 gap-4 py-4 px-6  md:grid-cols-4 lg:grid-cols-5 rounded-b-md">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4 px-6 rounded-b-md  overflow-y-auto">
             {state?.refresh ? (
               <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
                 <Loader />
@@ -236,7 +237,7 @@ const ImageGallery = () => {
             {/* Add Images button */}
             <label
               htmlFor="files"
-              className={`w-full h-32 md:h-44 lg:h-72 max-h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-dashed rounded-md text-black ${state?.refresh && "hidden"}`}
+              className={`w-full h-32 md:h-44 lg:h-72 max-h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-gray-300 border-dashed rounded-md text-black ${state?.refresh && "hidden"}`}
             >
               <span className="text-xl">
                 <GrGallery />

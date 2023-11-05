@@ -99,7 +99,7 @@ const Image = ({
         <img
           src={url}
           alt={imageAlt}
-          className="w-full h-full rounded-md shadow-sm aspect-square border"
+          className="w-full h-full rounded-md shadow-md aspect-square border"
         />
       </label>
     </div>
