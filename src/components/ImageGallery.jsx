@@ -237,12 +237,13 @@ const ImageGallery = () => {
             {/* Add Images button */}
             <label
               htmlFor="files"
-              className={`w-full h-32 md:h-44 lg:h-72 max-h-full flex flex-col justify-center items-center space-y-2 cursor-pointer border-2 border-gray-300 border-dashed rounded-md text-black ${state?.refresh && "hidden"}`}
+              title='Upload Image'
+              className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-4 px-0.5 md:px-0 md:py-0 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black  hover:text-gray-600 transition-all ease-in duration-300 ${state?.refresh && "hidden"}`}
             >
-              <span className="text-xl">
+              <span className="md:text-xl">
                 <GrGallery />
               </span>
-              <span>Add Images</span>
+              <span className='text-xs md:text-base'>Add Images</span>
               <input type="file" id="files" onChange={(e) => handleUploadImage(e.target.files)} className="hidden" />
             </label>
           </div>
