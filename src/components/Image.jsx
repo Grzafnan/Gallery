@@ -6,13 +6,18 @@ import { useImages } from "../context/ImageContext";
 
 /**
  * Image Component
- * @param {string} url - The URL of the image.
- * @param {string} imageAlt - The alt text for the image.
- * @param {string} id - The unique identifier for the image.
- * @param {number} index - The index of the image in the array.
- * @param {function} moveImageCard - Callback function to move the image card.
- * @param {function} onImageSelect - Callback function to handle image selection.
- * @param {function} findImage - Callback function to find image by ID.
+ * 
+ * @component
+ * 
+ * Represents an image card with drag-and-drop, checkbox selection, and hover functionalities.
+ * 
+ * @param {Object} props - The properties of the component.
+ * @param {string} props.url - The URL of the image.
+ * @param {string} props.imageAlt - The alt text for the image.
+ * @param {string} props.id - The unique identifier for the image.
+ * @param {number} props.index - The index of the image in the array.
+ * @param {function} props.moveImageCard - Callback function to move the image card.
+ * @param {function} props.findImage - Callback function to find an image by ID.
  */
 const Image = ({
   url,
@@ -22,13 +27,19 @@ const Image = ({
   moveImageCard,
   findImage,
 }) => {
+  // Accessing the image context for state management
   const { disPatch } = useImages();
+
   // State to track checkbox state
   const [isChecked, setIsChecked] = useState(false);
+
   // State to track hover state
   const [isHovered, setIsHovered] = useState(false);
 
-  // Function to handle checkbox change
+  /**
+   * Handles the change in the checkbox state.
+   * Toggles the checkbox state and dispatches an action for image selection.
+   */
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
     disPatch({
@@ -79,11 +90,25 @@ const Image = ({
   const opacityClasses = isDragging ? "opacity-50" : "opacity-100";
   const visibilityClasses = isHovered || isChecked ? "visible" : "hidden";
 
+  /**
+   * Handles mouse enter event to set hover state to true.
+   */
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  /**
+   * Handles mouse leave event to set hover state to false.
+   */
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   return (
     <div
       ref={(node) => drag(drop(node))}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`relative cursor-pointer transition-opacity  border-3 border-red-600 ${index === 0 ? "col-span-2 row-span-2" : " "
         } ${opacityClasses}`}
     >
@@ -104,6 +129,7 @@ const Image = ({
         <img
           src={url}
           alt={imageAlt}
+          loading="lazy"
           className="w-full h-full rounded-md shadow-md aspect-square border"
         />
       </label>

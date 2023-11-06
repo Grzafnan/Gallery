@@ -11,7 +11,7 @@ const ImageProvider = ({ children }) => {
 
   useEffect(() => {
     disPatch({ type: actionTypes.FETCHING_START })
-    fetch('images..json')
+    fetch('images.json')
       .then(res => res.json())
       .then(data =>
         disPatch({ type: actionTypes.FETCHING_SUCCESS, payload: data })

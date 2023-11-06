@@ -4,7 +4,6 @@ import { actionTypes } from "./actionTypes";
 export const initialState = {
   loading: false,
   error: false,
-  refresh: false,
   images: [],
   selectedImages: [],
 };
