@@ -1,6 +1,5 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable no-case-declarations */
-import { useReducer, useEffect } from 'react';
 import update from 'immutability-helper';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -9,91 +8,20 @@ import { GrGallery } from 'react-icons/gr';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
-
-// Define actions
-const IS_LOADING = 'IS_LOADING';
-const SET_IMAGES = 'SET_IMAGES';
-const SELECT_IMAGE = 'SELECT_IMAGE';
-const DELETE_SELECTED_IMAGES = 'DELETE_SELECTED_IMAGES';
-const UPLOAD_IMAGE = 'UPLOAD_IMAGE';
-const IS_REFRESH = 'IS_REFRESH';
-
-// Reducer function
-const imageReducer = (state, action) => {
-  switch (action.type) {
-    case IS_LOADING:
-      // Set loading state based on the action payload
-      return { ...state, loading: action.payload };
-    case SET_IMAGES:
-      // Update images state with the data received in the payload
-      return { ...state, images: action.payload };
-    case SELECT_IMAGE:
-      // Update selectedImages state based on the payload
-      return { ...state, selectedImages: action.payload };
-    case DELETE_SELECTED_IMAGES:
-      // Remove selected images from the images state and clear selectedImages
-      return {
-        ...state,
-        images: state.images.filter((image) => !state.selectedImages.includes(image)),
-        selectedImages: [],
-      };
-    case UPLOAD_IMAGE:
-      // Handle image upload response
-      return {
-        ...state,
-        images: [...state.images, action.payload],
-      };
-    case IS_REFRESH:
-      return {
-        ...state,
-        refresh: action.payload
-      }
-    default:
-      return state;
-  }
-};
+import { useImages } from '../context/ImageContext';
+import { actionTypes } from '../state/actionTypes';
 
 const ImageGallery = () => {
-  // Initial state for the reducer
-  const initialState = {
-    images: [],
-    selectedImages: [],
-    loading: false,
-    refresh: false,
-  };
+  const { state: { images, selectedImages, loading, error, refresh }, disPatch } = useImages();
 
-  // Use reducer with the defined reducer function and initial state
-  const [state, dispatch] = useReducer(imageReducer, initialState);
 
-  // useEffect to fetch data when the component mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Set loading to true before fetching data
-        dispatch({ type: IS_LOADING, payload: true });
-        const result = await fetch('images.json');
-        const data = await result.json();
-        if (data?.length > 0) {
-          // Update images state with fetched data
-          dispatch({ type: SET_IMAGES, payload: data });
-        }
-      } catch (error) {
-        // Log error and set loading to false in case of an error
-        console.error('Error fetching images:', error);
-      } finally {
-        // Set loading to false after data is fetched or an error occurs
-        dispatch({ type: IS_LOADING, payload: false });
-      }
-    };
+  let content;
 
-    // Call the fetch data function
-    fetchData();
-  }, [dispatch]);
 
   const handleUploadImage = async (files) => {
     try {
       // Set loading to true before uploading
-      dispatch({ type: IS_REFRESH, payload: true });
+      disPatch({ type: actionTypes.IS_REFRESH, payload: true });
 
       // Create FormData and append the selected file
       const formData = new FormData();
@@ -104,8 +32,8 @@ const ImageGallery = () => {
       // Check if the upload was successful
       if (response?.data?.data?.id) {
         const { id, display_url, title } = response?.data?.data;
-        dispatch({
-          type: UPLOAD_IMAGE, payload: {
+        disPatch({
+          type: actionTypes.UPLOAD_IMAGE, payload: {
             id,
             _id: id,
             url: display_url,
@@ -129,127 +57,128 @@ const ImageGallery = () => {
       })
     } finally {
       // Set loading to false after the upload or an error
-      dispatch({ type: IS_REFRESH, payload: false });
+      disPatch({ type: actionTypes.IS_REFRESH, payload: false });
     }
   };
 
   // Function to handle deleting selected images
   const handleDelete = () => {
-    // Dispatch the action to delete selected images
-    dispatch({ type: DELETE_SELECTED_IMAGES });
-  };
-
-  // Function to handle image selection
-  const handleImageSelect = (index, isSelected) => {
-    const updatedSelectedImages = isSelected
-      ? [...state.selectedImages, state.images[index]]
-      : state.selectedImages.filter((image) => image !== state.images[index]);
-    // Dispatch the action to update selected images
-    dispatch({ type: SELECT_IMAGE, payload: updatedSelectedImages });
+    // disPatch the action to delete selected images
+    disPatch({ type: actionTypes.DELETE_SELECTED_IMAGES });
   };
 
   // Function to find an image by ID
   const findImage = (id) => {
-    const image = state.images.find((img) => `${img._id}` === id);
+    const image = images.find((img) => `${img._id}` === id);
     return {
       image,
-      index: state.images.indexOf(image),
+      index: images.indexOf(image),
     };
   };
 
   // Function to move an image card
   const moveImageCard = (id, atIndex) => {
     const { image, index } = findImage(id);
-    // Dispatch the action to update images state with the moved image
-    dispatch({
-      type: SET_IMAGES,
-      payload: update(state.images, {
-        $splice: [
-          [index, 1],
-          [atIndex, 0, image],
-        ],
-      }),
+    // disPatch the action to update images state with the moved image
+    const data = update(images, {
+      $splice: [
+        [index, 1],
+        [atIndex, 0, image],
+      ],
+    })
+    console.log(data);
+    disPatch({
+      type: actionTypes.SET_IMAGES,
+      payload: data,
     });
   };
 
   // Function to get text based on the number of selected images
   const getImageSelectText = () => {
-    switch (state.selectedImages.length) {
+    switch (selectedImages.length) {
       case 0:
         return '';
       case 1:
         return '1 file selected';
       default:
-        return `${state.selectedImages.length} files selected`;
+        return `${selectedImages.length} files selected`;
     }
   };
 
+  if (loading) {
+    content = <Loader />
+  }
 
-  // Conditional rendering based on loading state
-  if (state.loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
-        <Loader />
-      </div>
-    );
+  if (error) {
+    content = <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
+      <h1 className='text-red-600'>Something went wrong!</h1>
+    </div>
+  }
+
+  if (!loading && !error && images.length === 0) {
+    content = <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
+      <p>Nothing to show. Products is empty!</p>
+    </div>
+  }
+
+  if (!loading && !error && images.length) {
+    content = images.map((image, index) => (
+      // Individual image component
+      <Image
+        key={image?._id}
+        id={image?._id}
+        url={image?.url}
+        imageAlt={image?.alt}
+        index={index}
+        moveImageCard={moveImageCard}
+        findImage={findImage}
+      />
+    ))
   }
 
   // Render the component with DndProvider for drag and drop functionality
   return (
     <DndProvider backend={HTML5Backend}>
-      {!state.loading && state.images.length > 0 && (
-        <section className="container bg-gray-100 mx-auto rounded-md p-4 shadow-lg">
-
-          {state.selectedImages.length > 0 ? (
-            // Display when there are selected images
-            <div className="flex justify-between items-center py-[.9rem] px-6 border rounded-md">
-              <h3 className="text-lg font-medium">{getImageSelectText()}</h3>
-              <button
-                onClick={handleDelete}
-                className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all duration-300 ease-in"
-              >
-                Delete {state.selectedImages.length > 1 ? 'files' : 'file'}
-              </button>
-
-            </div>
-          ) : (
-            // Display when there are no selected images
-            <h1 className="text-xl font-medium py-5 px-6 bg-white border-b shadow-md rounded-md">Gallery</h1>
-          )}
-          {/* Image grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4 px-6 rounded-b-md  overflow-y-auto">
-            {state?.refresh ? (
-              <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
-                <Loader />
-              </div>) : state.images.map((image, index) => (
-                // Individual image component
-                <Image
-                  key={image?._id}
-                  id={image?._id}
-                  url={image?.url}
-                  imageAlt={image?.alt}
-                  index={index}
-                  moveImageCard={moveImageCard}
-                  onImageSelect={handleImageSelect}
-                  findImage={findImage}
-                />
-              ))}
-            {/* Add Images button */}
-            <label
-              htmlFor="files"
-              title='Upload Image'
-              className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-4 px-0.5 md:px-0 md:py-0 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black  hover:text-gray-600 transition-all ease-in duration-300 ${state?.refresh && "hidden"}`}
+      <section className="container bg-gray-100 mx-auto rounded-md p-4 shadow-lg">
+        {selectedImages.length > 0 ? (
+          // Display when there are selected images
+          <div className="flex justify-between items-center py-[.9rem] px-6 border rounded-md">
+            <h3 className="text-lg font-medium">{getImageSelectText()}</h3>
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white font-medium px-4 py-1.5 border border-red-500 hover:bg-white hover:border-red-500 hover:text-red-500 rounded-md transition-all duration-300 ease-in"
             >
-              <span className="md:text-xl">
-                <GrGallery />
-              </span>
-              <span className='text-xs md:text-base'>Add Images</span>
-              <input type="file" id="files" onChange={(e) => handleUploadImage(e.target.files)} className="hidden" />
-            </label>
+              Delete {selectedImages.length > 1 ? 'files' : 'file'}
+            </button>
+
           </div>
-        </section>
-      )}
-    </DndProvider>
+        ) : (
+          // Display when there are no selected images
+          <h1 className="text-xl font-medium py-5 px-6 bg-white border-b shadow-md rounded-md">Gallery</h1>
+        )}
+        {/* Image grid */}
+        {
+          refresh ? (<Loader />) :
+            (<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4 px-6 rounded-b-md  overflow-y-auto">
+              {/* Add Images button */}
+              {content}
+              <div className={`${!refresh && loading ? "hidden" : "block"}`}>
+                <label
+                  htmlFor="files"
+                  title='Upload Image'
+                  className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-4 px-0.5 md:px-0 md:py-0 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black  hover:text-gray-600 transition-all ease-in duration-300 ${!refresh && loading ? "hidden" : "block"}`}
+                >
+                  <span className={`md:text-xl ${!refresh && loading ? "hidden" : "block"}`}>
+                    <GrGallery />
+                  </span>
+                  <span className='text-xs md:text-base'>Add Images</span>
+                  <input type="file" id="files" onChange={(e) => handleUploadImage(e.target.files)} className={`${!refresh && loading ? "hidden" : "block"}`} />
+                </label>
+              </div>
+            </div>)
+        }
+      </section>
+    </DndProvider >
   );
 };
 

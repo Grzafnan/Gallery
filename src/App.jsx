@@ -1,10 +1,13 @@
 import ImageGallery from "./components/ImageGallery";
+import ImageProvider from "./context/ImageContext";
 function App() {
 
   return (
-    <main className="p-4">
-      <ImageGallery />
-    </main>
+    <ImageProvider>
+      <main className="p-4">
+        <ImageGallery />
+      </main>
+    </ImageProvider>
   );
 }
 

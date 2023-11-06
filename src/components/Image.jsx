@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { actionTypes } from "../state/actionTypes";
+import { useImages } from "../context/ImageContext";
 
 /**
  * Image Component
@@ -18,9 +20,9 @@ const Image = ({
   id,
   index,
   moveImageCard,
-  onImageSelect,
   findImage,
 }) => {
+  const { disPatch } = useImages();
   // State to track checkbox state
   const [isChecked, setIsChecked] = useState(false);
   // State to track hover state
@@ -29,7 +31,10 @@ const Image = ({
   // Function to handle checkbox change
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
-    onImageSelect(index, !isChecked);
+    disPatch({
+      type: actionTypes.SELECT_IMAGE,
+      payload: { index, isSelected: !isChecked },
+    });
   };
 
   // Get the original index of the image
