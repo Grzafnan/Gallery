@@ -7,21 +7,25 @@ This project is a responsive image gallery built with React JS, incorporating fe
 **Gallery Layout:**
 
 - Implemented a grid layout for the image gallery.
-- The gallery displays images, with one feature image larger than the others.
-  Sorting:
-- Enabled reordering functionality to rearrange the order of images in the gallery.
-- Implemented intuitive drag-and-drop functionality for reordering.
+- One image is featured and displayed larger than the others.
+  
+### Sorting
 
-**Deleting Multiple Images:**
+- Enabled reordering functionality for customizing image order.
+- Intuitive drag-and-drop functionality for easy sorting.
 
-- Users can select multiple images and delete them.
+### Deleting Multiple Images
+
+- Users can select and delete multiple images.
 - Clear visual indication of selected images for a user-friendly experience.
-  Setting Feature Image:
+
+### Setting Feature Image
+
 - Users can set a feature image through sorting.
-- The first image (from LTR) is considered the featured image.
+- The first image (from left to right) is considered the featured image.
 - The feature image is visually distinct from other images.
 
-## User Experience:
+## User Experience
 
 - Ensured a smooth and responsive user experience.
 - Implemented transitions and animations for a polished look and feel.
@@ -29,6 +33,15 @@ This project is a responsive image gallery built with React JS, incorporating fe
 ## Live Demo:
 
 The React JS image gallery is hosted [here](https://images-gallery-ollyo.netlify.app/).
+
+## Performance and SEO
+
+- Achieved high Lighthouse scores:
+  - Performance: 97
+  - Accessibility: 100
+  - Best Practices: 95
+  - SEO: 90
+
 
 ## Development:
 
