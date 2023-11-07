@@ -1,12 +1,20 @@
-/* eslint-disable react/prop-types */
-import { createContext, useContext, useEffect, useReducer, } from 'react';
+import { Dispatch, ReactNode, createContext, useContext, useEffect, useReducer, } from 'react';
 import { actionTypes } from '../state/actionTypes';
-import { imageReducer, initialState } from '../state/imageReducer';
+import { IState, imageReducer, initialState } from '../state/imageReducer';
+
+interface ImageContextProps {
+  state: IState;
+  disPatch: Dispatch<any>;
+}
+
+const IMAGE_CONTEXT = createContext<ImageContextProps | undefined>(undefined);
+
+interface ImageProviderProps {
+  children: ReactNode
+}
 
 
-const IMAGE_CONTEXT = createContext();
-
-const ImageProvider = ({ children }) => {
+const ImageProvider: React.FC<ImageProviderProps> = ({ children }) => {
   const [state, disPatch] = useReducer(imageReducer, initialState)
 
   useEffect(() => {
@@ -18,12 +26,13 @@ const ImageProvider = ({ children }) => {
       )
       // eslint-disable-next-line no-unused-vars
       .catch(err => {
+        console.log("err", err);
         disPatch({ type: actionTypes.FETCHING_ERROR })
       })
   }, []);
 
 
-  const value = {
+  const value: ImageContextProps = {
     state,
     disPatch
   }
@@ -37,6 +46,10 @@ const ImageProvider = ({ children }) => {
 
 export const useImages = () => {
   const context = useContext(IMAGE_CONTEXT);
+  if (!context) {
+    throw new Error('useImages must be used within an ImageProvider');
+  }
+
   return context;
 }
 

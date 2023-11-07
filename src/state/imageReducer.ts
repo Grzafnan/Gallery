@@ -1,15 +1,31 @@
+import { IImage } from "../types/globalTypes";
 import { actionTypes } from "./actionTypes";
 
+export interface IState {
+  loading: boolean;
+  error: boolean;
+  refresh: boolean;
+  images: IImage[];
+  selectedImages: IImage[];
+}
+
+
+export interface IAction {
+  type: string;
+  payload?: any;
+}
+
 // Initial state for the reducer
-export const initialState = {
+export const initialState:IState = {
   loading: false,
   error: false,
+  refresh: false,
   images: [],
   selectedImages: [],
 };
 
 // Reducer function
-export const imageReducer = (state, action) => {
+export const imageReducer = (state: typeof initialState, action: IAction) => {
   switch (action.type) {
     case actionTypes.FETCHING_START:
       return {
@@ -31,7 +47,7 @@ export const imageReducer = (state, action) => {
         ...state,
         selectedImages: isSelected
           ? [...state.selectedImages, state.images[index]]
-          : state.selectedImages.filter((image) => image !== state.images[index]),
+          : state?.selectedImages.filter((image) => image !== state.images[index]),
       };
     case actionTypes.DELETE_SELECTED_IMAGES:
       return {

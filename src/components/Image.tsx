@@ -1,8 +1,8 @@
-/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { actionTypes } from "../state/actionTypes";
 import { useImages } from "../context/ImageContext";
+import { IImage } from "../types/globalTypes";
 
 /**
  * Image Component
@@ -19,6 +19,17 @@ import { useImages } from "../context/ImageContext";
  * @param {function} props.moveImageCard - Callback function to move the image card.
  * @param {function} props.findImage - Callback function to find an image by ID.
  */
+
+interface IProps {
+  url: string;
+  imageAlt: string;
+  id: string;
+  index: number;
+  moveImageCard: (id: string, atIndex: number) => void;
+  findImage: (id: string) => { image: IImage; index: number; };
+}
+
+
 const Image = ({
   url,
   imageAlt,
@@ -26,15 +37,15 @@ const Image = ({
   index,
   moveImageCard,
   findImage,
-}) => {
+}: IProps) => {
   // Accessing the image context for state management
   const { disPatch } = useImages();
 
   // State to track checkbox state
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState<boolean>(false);
 
   // State to track hover state
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   /**
    * Handles the change in the checkbox state.
@@ -75,7 +86,7 @@ const Image = ({
   const [, drop] = useDrop(
     () => ({
       accept: "IMAGE",
-      hover({ id: draggedId }) {
+      hover({ id: draggedId }: { id: string }) {
         // If the dragged image is different from the current image, move the card
         if (draggedId !== id) {
           const { index: overIndex } = findImage(id);

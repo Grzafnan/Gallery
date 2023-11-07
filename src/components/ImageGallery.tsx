@@ -1,6 +1,4 @@
-/* eslint-disable no-unsafe-optional-chaining */
-/* eslint-disable no-case-declarations */
-import update from 'immutability-helper';
+import { ChangeEvent } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import Image from './Image';
@@ -10,14 +8,8 @@ import { toast } from 'react-toastify';
 import Loader from './Loader';
 import { useImages } from '../context/ImageContext';
 import { actionTypes } from '../state/actionTypes';
+import { IImage } from '../types/globalTypes';
 
-/**
- * ImageGallery Component
- * 
- * @component
- * 
- * Represents a gallery of images with drag-and-drop, upload, and delete functionalities.
- */
 const ImageGallery = () => {
   // Accessing the image context for state management
   const { state, disPatch } = useImages();
@@ -26,46 +18,53 @@ const ImageGallery = () => {
   /**
    * Handles the upload of an image file.
    * 
-   * @param {FileList} files - The selected image files.
+   * @param {ChangeEvent<HTMLInputElement>} e - The input change event containing the selected image files.
    */
-  const handleUploadImage = async (files) => {
+
+  const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
     try {
       // Set refresh state to true before uploading
       disPatch({ type: actionTypes.IS_REFRESH, payload: true });
 
-      // Create FormData and append the selected file
-      const formData = new FormData();
-      formData.append('image', files[0]);
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        // Create FormData and append the selected file
+        const formData = new FormData();
+        formData.append('image', files[0]);
 
-      // Make the API request to upload the image
-      const response = await axios.post(
-        'https://api.imgbb.com/1/upload?key=199be7191b070f135985de4adcce0a6f',
-        formData
-      );
+        // Make the API request to upload the image
+        const response = await axios.post(
+          'https://api.imgbb.com/1/upload?key=199be7191b070f135985de4adcce0a6f',
+          formData
+        );
 
-      // Check if the upload was successful
-      if (response?.data?.data?.id) {
-        const { id, display_url, title } = response?.data?.data;
+        // Check if the upload was successful
+        if (response?.data?.data?.id) {
+          const { id, display_url, title } = response?.data?.data;
 
-        // Dispatch action to update images state with the uploaded image
-        disPatch({
-          type: actionTypes.UPLOAD_IMAGE,
-          payload: {
-            id,
-            _id: id,
-            url: display_url,
-            alt: title,
-          },
-        });
+          // Dispatch action to update images state with the uploaded image
+          disPatch({
+            type: actionTypes.UPLOAD_IMAGE,
+            payload: {
+              id,
+              _id: id,
+              url: display_url,
+              alt: title,
+            },
+          });
 
-        // Display success toast message
-        toast.success('Image uploaded successfully!', {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 8000,
-        });
-      } else {
-        // Handle the error
-        console.error('Error uploading image:', response.statusText);
+          // Display success toast message
+          toast.success('Image uploaded successfully!', {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 8000,
+          });
+        } else {
+          // Handle the error
+          toast.error('Error uploading image', {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 8000,
+          });
+        }
       }
     } catch (error) {
       // Log error and display error toast message
@@ -80,12 +79,17 @@ const ImageGallery = () => {
     }
   };
 
+
   /**
    * Handles the deletion of selected images.
    */
   const handleDelete = () => {
     // Dispatch action to delete selected images
     disPatch({ type: actionTypes.DELETE_SELECTED_IMAGES });
+    toast.success(`${selectedImages?.length > 1 ? selectedImages?.length : " "} Image${selectedImages?.length > 1 ? "s" : " "} Deleted successfully!`, {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 1500,
+    });
   };
 
   /**
@@ -94,13 +98,20 @@ const ImageGallery = () => {
    * @param {string} id - The unique identifier of the image.
    * @returns {Object} - An object containing the found image and its index.
    */
-  const findImage = (id) => {
-    const image = images.find((img) => `${img._id}` === id);
-    return {
-      image,
-      index: images.indexOf(image),
-    };
+  const findImage = (id: string): { image: IImage; index: number } => {
+    const image = images.find((img: IImage) => `${img._id}` === id);
+
+    if (image) {
+      return {
+        image,
+        index: images.indexOf(image),
+      };
+    } else {
+      // Handle the case where the image is not found
+      throw new Error(`Image with ID ${id} not found`);
+    }
   };
+
 
   /**
    * Moves an image card within the gallery.
@@ -108,29 +119,22 @@ const ImageGallery = () => {
    * @param {string} id - The unique identifier of the image.
    * @param {number} atIndex - The index to move the image card to.
    */
-  const moveImageCard = (id, atIndex) => {
+  const moveImageCard = (id: string, atIndex: number) => {
     const { image, index } = findImage(id);
+    // Create a new array with the moved image
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    newImages.splice(atIndex, 0, image);
 
     // Dispatch action to update images state with the moved image
-    const data = update(images, {
-      $splice: [
-        [index, 1],
-        [atIndex, 0, image],
-      ],
-    });
-
     disPatch({
       type: actionTypes.SET_IMAGES,
-      payload: data,
+      payload: newImages,
     });
   };
 
-  /**
-   * Generates text based on the number of selected images.
-   * 
-   * @returns {string} - The text indicating the number of selected images.
-   */
-  const getImageSelectText = () => {
+
+  const getImageSelectText = (): string => {
     switch (selectedImages.length) {
       case 0:
         return '';
@@ -154,29 +158,29 @@ const ImageGallery = () => {
 
   if (error) {
     content = (
-      <div className="min-h-[60vh] flex justify-center items-start mt-4">
-        <h1 className="text-red-600">Something went wrong!</h1>
+      <div className="min-h-[60vh] flex justify-center items-start">
+        <h1 className="text-red-600 mt-10">Something went wrong!</h1>
       </div>
     );
   }
 
   if (error && !loading) {
     content = (
-      <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold mt-5">
-        <h1 className="text-red-600">Something went wrong!</h1>
+      <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
+        <h1 className="text-red-600 mt-10">Something went wrong!</h1>
       </div>
     );
   }
 
-  if (!loading && !error && images.length <= 0) {
+  if (!loading && !error && images.length === 0) {
     content = (
       <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
-        <p>Nothing to show. Products are empty!</p>
+        <p className='mt-10'>Nothing to show. Images are empty!</p>
       </div>
     );
   }
 
-  if (!loading && !error && images.length > 0) {
+  if (!loading && !error && images.length) {
     content = (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4 px-6 rounded-b-md overflow-y-auto">
         {/* Display image cards */}
@@ -205,7 +209,7 @@ const ImageGallery = () => {
           <input
             type="file"
             id="files"
-            onChange={(e) => handleUploadImage(e.target.files)}
+            onChange={(e) => handleUploadImage(e)}
             className="hidden"
           />
         </label>
