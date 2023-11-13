@@ -59,7 +59,7 @@ const RenderContent = ({
       <label
         htmlFor="files"
         title="Upload Image"
-        className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-8 px-0.5 md:px-2 md:py-10 lg:px-0 lg:py-0 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black hover:text-gray-600 transition-all ease-in duration-300`}
+        className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-8 px-0.5 md:px-2 md:py-10 lg:px-10 lg:py-20 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black hover:text-gray-600 transition-all ease-in duration-300`}
       >
         <span className="md:text-xl">
           <GrGallery />
