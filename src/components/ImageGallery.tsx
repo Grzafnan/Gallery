@@ -1,14 +1,13 @@
 import { ChangeEvent } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
-import Image from './Image';
-import { GrGallery } from 'react-icons/gr';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
 import { useImages } from '../context/ImageContext';
 import { actionTypes } from '../state/actionTypes';
 import { IImage } from '../types/globalTypes';
+import RenderContent from './RenderContent';
 
 const ImageGallery = () => {
   // Accessing the image context for state management
@@ -20,8 +19,7 @@ const ImageGallery = () => {
    * 
    * @param {ChangeEvent<HTMLInputElement>} e - The input change event containing the selected image files.
    */
-
-  const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     try {
       // Set refresh state to true before uploading
       disPatch({ type: actionTypes.IS_REFRESH, payload: true });
@@ -79,7 +77,6 @@ const ImageGallery = () => {
     }
   };
 
-
   /**
    * Handles the deletion of selected images.
    */
@@ -112,7 +109,6 @@ const ImageGallery = () => {
     }
   };
 
-
   /**
    * Moves an image card within the gallery.
    * 
@@ -133,7 +129,11 @@ const ImageGallery = () => {
     });
   };
 
-
+  /**
+   * Gets the text indicating the number of selected images.
+   * 
+   * @returns {string} - The text indicating the number of selected images.
+   */
   const getImageSelectText = (): string => {
     switch (selectedImages.length) {
       case 0:
@@ -144,78 +144,6 @@ const ImageGallery = () => {
         return `${selectedImages.length} files selected`;
     }
   };
-
-  // Content rendering based on loading and error states
-  let content;
-
-  if (loading) {
-    content = (
-      <div className="min-h-[60vh] flex justify-center items-start mt-4">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (error) {
-    content = (
-      <div className="min-h-[60vh] flex justify-center items-start">
-        <h1 className="text-red-600 mt-10">Something went wrong!</h1>
-      </div>
-    );
-  }
-
-  if (error && !loading) {
-    content = (
-      <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
-        <h1 className="text-red-600 mt-10">Something went wrong!</h1>
-      </div>
-    );
-  }
-
-  if (!loading && !error && images.length === 0) {
-    content = (
-      <div className="min-h-[60vh] flex justify-center items-start text-xl font-semibold">
-        <p className='mt-10'>Nothing to show. Images are empty!</p>
-      </div>
-    );
-  }
-
-  if (!loading && !error && images.length) {
-    content = (
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 py-4 px-6 rounded-b-md overflow-y-auto">
-        {/* Display image cards */}
-        {images.map((image, index) => (
-          <Image
-            key={image?._id}
-            id={image?._id}
-            url={image?.url}
-            imageAlt={image?.alt}
-            index={index}
-            moveImageCard={moveImageCard}
-            findImage={findImage}
-          />
-        ))}
-
-        {/* Add Images button */}
-        <label
-          htmlFor="files"
-          title="Upload Image"
-          className={`w-full h-full flex flex-col justify-center items-center space-y-2 py-4 px-0.5 md:px-0 md:py-0 cursor-pointer border-2 border-gray-300 hover:border-gray-500 border-dashed rounded-md text-black hover:text-gray-600 transition-all ease-in duration-300`}
-        >
-          <span className="md:text-xl">
-            <GrGallery />
-          </span>
-          <span className="text-xs md:text-base">Add Images</span>
-          <input
-            type="file"
-            id="files"
-            onChange={(e) => handleUploadImage(e)}
-            className="hidden"
-          />
-        </label>
-      </div>
-    );
-  }
 
   // Render the component with DndProvider for drag and drop functionality
   return (
@@ -246,7 +174,15 @@ const ImageGallery = () => {
           </div>
         ) : (
           <>
-            {content}
+            {/* RenderContent component for displaying content based on loading and error states */}
+            <RenderContent
+              loading={loading}
+              error={error}
+              images={images}
+              moveImageCard={moveImageCard}
+              findImage={findImage}
+              handleUploadImage={handleUploadImage}
+            />
           </>
         )}
       </section>
